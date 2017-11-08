@@ -4,7 +4,7 @@ using UnityEngine;
 public class Door : MonoBehaviour
 {
 
-    public PathNode controllingNode;
+    private PathNode controllingNode;
     private Vector3 closedPosition;
     public Vector3 distanceToOpen;
     private const float DOOR_SPEED = 0.5f;
@@ -13,6 +13,7 @@ public class Door : MonoBehaviour
     void Start()
     {
         closedPosition = transform.position;
+        controllingNode = transform.parent.GetComponentInChildren<PathNode>();
     }
 
     // Update is called once per frame

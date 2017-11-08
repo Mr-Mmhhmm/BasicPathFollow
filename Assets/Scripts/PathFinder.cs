@@ -11,6 +11,14 @@ public class PathFinder : MonoBehaviour
     public PathNode GetTargetNode { get { return targetNode; } }
     public const float targetVarience = 1;
 
+    public bool HasReachedTarget
+    {
+        get
+        {
+            return Vector3.Distance(transform.position, targetNode.transform.position) < targetVarience;
+        }
+    }
+
 
     public void SetCurrentNode()
     {
@@ -37,49 +45,35 @@ public class PathFinder : MonoBehaviour
     {
         if (!targetNode || (targetNode && Vector3.Distance(transform.position, targetNode.transform.position) < targetVarience))
         {
+            lastNode = currentNode;
+            currentNode = targetNode;
+
             if (currentNode.usedConnections.Count > 0)
             {
-                lastNode = currentNode;
-                currentNode = targetNode;
                 if (canUseLastTarget)
                 {
-                    int randomNum = Random.Range(0, currentNode.usedConnections.Count);
-                    targetNode = currentNode.usedConnections[randomNum].target.GetComponent<PathNode>();
+                    targetNode = currentNode.GetComponent<PathNode>().GetRandomActiveConnection;
                 }
                 else
                 {
-                    for (int i = 0; i <= 10; i++) // TODO: get rid of the while and use a logical elimination for the last node
+                    for (int i = 0; i < 20; i++)
                     {
-                        int randomNum = Random.Range(0, currentNode.usedConnections.Count);
-                        //    int indexOfLastNode = targetNode.usedConnections.Count + 1;
-                        //    for (int i = 0; i < targetNode.usedConnections.Count; i++)
-                        //    {
-
-                        //        if (targetNode.usedConnections[i].target == currentNode)
-                        //        {
-                        //            indexOfLastNode = i;
-                        //            Debug.Log(i);
-                        //            break;
-                        //        }
-                        //    }
-                        //    if (randomNum == indexOfLastNode)
-                        //    {
-                        //        randomNum++ ;
-                        //        randomNum = randomNum % targetNode.usedConnections.Count;
-                        //        Debug.Log(randomNum);
-                        //    }
-
-                        //}
-
-                        targetNode = currentNode.usedConnections[randomNum].target.GetComponent<PathNode>();
-                        if (targetNode != lastNode) break;
+                        targetNode = currentNode.GetComponent<PathNode>().GetRandomActiveConnection;
+                        if (targetNode && targetNode != lastNode) break;
                     }
                 }
             }
-            else
-            {
-                targetNode = currentNode;
-            }
+            //else
+            //{
+            //    targetNode = currentNode;
+            //}
         }
+    }
+
+    public void GetToDestination(Vector3 endDestination, bool canUseLastTarget = false)
+    {
+        lastNode = currentNode;
+        currentNode = targetNode;
+        targetNode = currentNode.NodeClosestTo(endDestination, lastNode);
     }
 }

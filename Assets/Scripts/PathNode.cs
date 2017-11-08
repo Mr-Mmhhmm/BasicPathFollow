@@ -69,6 +69,27 @@ public class PathNode : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// returns a path to an open door, or null if it cant find an open door
+    /// </summary>
+    public PathNode GetRandomActiveConnection
+    {
+        get
+        {
+            PathNode targetNode = null;
+            for (int i = 0; i <= 10; i++) // TODO: get rid of the while and use a logical elimination for the last node
+            {
+                PathNode tryNode = usedConnections[Random.Range(0, usedConnections.Count)].target.GetComponent<PathNode>();
+                if (!tryNode.isDoorClosed)
+                {
+                    targetNode = tryNode;
+                    break;
+                }
+            }
+            return targetNode;
+        }
+    }
+
     public void SetupNode(float SightRange, string Name)
     {
         sightRange = SightRange;
@@ -232,6 +253,22 @@ public class PathNode : MonoBehaviour
 #if UNITY_EDITOR
         Undo.RegisterCompleteObjectUndo(this, "Assembled Path to Use");
 #endif
+    }
+
+    public PathNode NodeClosestTo(Vector3 endDestination, PathNode cantUse = null)
+    {
+        PathNode target = null;
+        float shortestDistance = float.PositiveInfinity;
+        foreach (Connection connection in usedConnections)
+        {
+            float distance = Vector3.Distance(connection.target.transform.position, endDestination);
+            if (!connection.target.GetComponent<PathNode>().isDoorClosed && distance < shortestDistance && connection.target.GetComponent<PathNode>() != cantUse)
+            {
+                shortestDistance = distance;
+                target = connection.target.GetComponent<PathNode>();
+            }
+        }
+        return target;
     }
 
     public void SetMaxJumpDistance(float distance)

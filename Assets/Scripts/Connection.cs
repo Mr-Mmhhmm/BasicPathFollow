@@ -41,6 +41,7 @@ public class Connection : ScriptableObject
         Connection newConnection = CreateInstance<Connection>();
         newConnection.Init(MyPosition, Target, MaxJumpDistance, MaxDropHeight);
         return newConnection;
+        new HunterAI();
     }
 
     private float GetWidth(Vector3 myPosition)
