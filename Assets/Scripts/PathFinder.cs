@@ -1,12 +1,8 @@
 ﻿
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PathFinder : MonoBehaviour
 {
-    public Text text;
-
     private PathNode currentNode;
     public PathNode GetCurrentNode { get { return currentNode; } }
     private PathNode lastNode;
@@ -34,7 +30,6 @@ public class PathFinder : MonoBehaviour
             }
             int randomNum = Random.Range(0, currentNode.usedConnections.Count);
             targetNode = currentNode.usedConnections[randomNum].target.GetComponent<PathNode>();
-            text.text = targetNode.name;
         }
     }
 
@@ -79,7 +74,6 @@ public class PathFinder : MonoBehaviour
                         targetNode = currentNode.usedConnections[randomNum].target.GetComponent<PathNode>();
                         if (targetNode != lastNode) break;
                     }
-                    text.text = targetNode.usedConnections[0].target.name;
                 }
             }
             else

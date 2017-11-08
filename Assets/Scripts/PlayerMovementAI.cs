@@ -7,7 +7,6 @@ public class PlayerMovementAI : PathFinder
     private void Start()
     {
         SetCurrentNode();
-        text.text = GetTargetNode.usedConnections[0].target.name;
     }
     private void Update()
     {
@@ -17,8 +16,6 @@ public class PlayerMovementAI : PathFinder
         {
             PickRandomNeighbouringConnection();
         }
-
-        //transform.LookAt(new Vector3(targetNode.transform.position.x, transform.position.y, targetNode.transform.position.z));
         if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, Speed * Time.deltaTime);
     }
 }
