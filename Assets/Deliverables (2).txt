@@ -1,0 +1,22 @@
+- Create an open area with walls that are the full height of your AI units. Do not have any walls touching each other or dead ends unless you think that your pathfinding script can handle it. Add your pathnodes and build the paths.
+- Add at least three key objects for the RunnerAI to find and pickup.
+- The Runner should go into Pickup State when the object when it is in sight.
+- The Runner should be in Wander State when it does not see a Hunter or key object.
+- When the Runner gets close to the key it will "pick it up".
+- When all the keys have been picked up the Runner has won. Stop the game.
+- The Runner should be in Flee State when it sees a Hunter.
+- The Runner still needs to move on the path grid at all times
+- Add at least two Hunter that will go into Follow State if there is a line of sight to the Runner.
+- The Hunter should be in Search State if it cannot see the Runner.
+- If a Hunter gets within range of the Runner then the game is over.
+
+Extras
+- Add some low walls that the AI can see over but must still path around.
+- Do not allow any two AI to use the same path at the same time. They should never actually bump into or move through each other.
+- Add a sprint to the Runner that can be used for a short time in Flee State. After that it cannot be used for a time.
+- Have the Hunters call out when it spots the Runner. This will put all other Hunters into Respond State.
+- Hunters in Respond State will move to the location that the call was made from.
+- If a Hunter loses sight of the Runner have it move to the last known location before switching to Search State.
+- Add a door that opens when the keys are gathered. The Runner needs to find the way out to win.
+
+Total Marks 30
