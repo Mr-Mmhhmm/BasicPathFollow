@@ -7,7 +7,7 @@ public class RunnerAI : PathFinder
 
     public float Speed = 15f;
     private int KeysToFind;
-    public Transform goal;
+    private Transform goal;
 
     private enum State { Wander, PickupKey, Flee, Escape }
     private State myState;
@@ -19,12 +19,13 @@ public class RunnerAI : PathFinder
     }
     private void Update()
     {
-        //if (!GetCurrentNode) SetCurrentNode();
 
-        if (Physics.CheckSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyHunters)) myState = State.Flee;
-        else if (Physics.CheckSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyKeys)) myState = State.PickupKey;
-        else if (KeysToFind > 0) myState = State.Wander;
-        else myState = State.Escape;
+        if (CanSee(SIGHT_RANGE, LayerMasks.onlyHunters, LayerMasks.onlyWalls)) myState = State.Flee;
+        else if (CanSee(SIGHT_RANGE, LayerMasks.onlyKeys, LayerMasks.onlyWalls)) myState = State.PickupKey;
+        else /*if (KeysToFind > 0)*/ myState = State.Wander;
+        //else myState = State.Escape;
+
+
 
         if (HasReachedTarget)
         {
@@ -58,14 +59,24 @@ public class RunnerAI : PathFinder
                         }
                         #endregion
 
-                        if (goal)
-                        {
-                            GetToDestination(goal.position);
-                        }
+                        if (goal) GetToDestination(goal.position);
                     }
 
                     break;
                 case State.Flee:
+                    //Debug.Log("Flee");
+                    Collider[] hunters = Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyHunters);
+                    Vector3 safeSpot = transform.position;
+                    foreach (Collider hunter in hunters)
+                    {
+                        if (!Physics.Linecast(transform.position, hunter.transform.position, LayerMasks.onlyWalls))
+                        {
+                            Debug.Log("Fleeing from " + hunter.name);
+                            safeSpot += transform.position - hunter.transform.position;
+                        }
+                    }
+                    //transform.position = safeSpot;
+                    GetToDestination(safeSpot);
                     break;
                 case State.Escape:
                     break;
@@ -90,5 +101,25 @@ public class RunnerAI : PathFinder
 
         // Do the movement
         if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, Speed * Time.deltaTime);
+    }
+
+
+
+    private bool CanSee(float Range, LayerMask OnlyHit, LayerMask CanBlock)
+    {
+        bool canSee = false;
+        if (Physics.CheckSphere(transform.position, Range, OnlyHit))
+        {
+            foreach (Collider obj in Physics.OverlapSphere(transform.position, Range, OnlyHit))
+            {
+                if (!Physics.Linecast(transform.position, obj.transform.position, CanBlock))
+                {
+                    canSee = true;
+                    break;
+                }
+            }
+        }
+
+        return canSee;
     }
 }

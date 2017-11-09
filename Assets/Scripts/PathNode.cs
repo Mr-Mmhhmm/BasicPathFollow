@@ -20,7 +20,7 @@ public class PathNode : MonoBehaviour
 #if UNITY_EDITOR
     [SerializeField] [ReadOnly]
 #endif
-    private List<GameObject> connections; // updated with "BuildConnections"
+    public List<GameObject> connections; // updated with "BuildConnections"
 #if UNITY_EDITOR
     [SerializeField] [ReadOnly]
 #endif
