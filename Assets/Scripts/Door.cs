@@ -1,5 +1,6 @@
 ﻿
 using UnityEngine;
+using Pathing;
 
 public class Door : MonoBehaviour
 {
