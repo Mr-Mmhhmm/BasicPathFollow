@@ -6,6 +6,7 @@ public class HunterAI : PathFinder
 {
     public float Speed = 15f;
     private const float SIGHT_RANGE = 50;
+    private const float CAPTURE_RANGE = 10;
     private Transform goal;
 
     private enum State { Search, Follow }
@@ -35,9 +36,11 @@ public class HunterAI : PathFinder
                     }
                     break;
                 case State.Follow:
+                    Collider[] runners = Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyRunners);
+
                     #region Find our goal
                     float closestRunner = float.PositiveInfinity;
-                    foreach (Collider runner in Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyRunners))
+                    foreach (Collider runner in runners)
                     {
                         float distance = Vector3.Distance(transform.position, runner.transform.position);
                         if (distance < closestRunner)
@@ -48,7 +51,17 @@ public class HunterAI : PathFinder
                     }
                     #endregion
 
-                    if (goal) GetToDestination(goal.position);
+                    if (goal)
+                    {
+                        if (Vector3.Distance(transform.position, goal.position) < CAPTURE_RANGE)
+                        {
+                            Camera.main.GetComponent<SceneController>().MainMenu();
+                        }
+                        else
+                        {
+                            GetToDestination(goal.position);
+                        }
+                    }
 
                     break;
                 default:

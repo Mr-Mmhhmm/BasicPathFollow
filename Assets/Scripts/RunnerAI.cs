@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class RunnerAI : PathFinder
 {
@@ -6,7 +7,7 @@ public class RunnerAI : PathFinder
     private const float SIGHT_RANGE = 40;
 
     public float Speed = 15f;
-    private int KeysToFind;
+    private List<GameObject> keys;
     private Transform goal;
 
     private enum State { Wander, PickupKey, Flee, Escape }
@@ -15,15 +16,15 @@ public class RunnerAI : PathFinder
     private void Start()
     {
         SetCurrentNode();
-        KeysToFind = GameObject.FindGameObjectsWithTag("Key").Length;
+        keys = new List<GameObject>(GameObject.FindGameObjectsWithTag("Key"));
     }
     private void Update()
     {
 
         if (CanSee(SIGHT_RANGE, LayerMasks.onlyHunters, LayerMasks.onlyWalls)) myState = State.Flee;
         else if (CanSee(SIGHT_RANGE, LayerMasks.onlyKeys, LayerMasks.onlyWalls)) myState = State.PickupKey;
-        else /*if (KeysToFind > 0)*/ myState = State.Wander;
-        //else myState = State.Escape;
+        else if (keys.Count == 0 && CanSee(SIGHT_RANGE, LayerMasks.onlyDoors, LayerMasks.onlyHunters)) myState = State.Escape;
+        else myState = State.Wander;
 
 
 
@@ -35,43 +36,41 @@ public class RunnerAI : PathFinder
                     PickRandomNeighbouringConnection();
                     break;
                 case State.PickupKey:
-                    if (Physics.CheckSphere(transform.position, PICKUP_RADIUS, LayerMasks.onlyKeys))
+                    for (int i = 0; i < keys.Count; i++)
                     {
-                        Collider[] keys = Physics.OverlapSphere(transform.position, PICKUP_RADIUS, LayerMasks.onlyKeys);
-                        foreach (Collider key in keys)
+                        if (Vector3.Distance(transform.position, keys[i].transform.position) < PICKUP_RADIUS)
                         {
-                            KeysToFind--;
-                            Destroy(key.gameObject);
-                        }
-                    }
-                    else
-                    {
-                        #region Find our goal
-                        float closestKey = float.PositiveInfinity;
-                        foreach (Collider key in Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyKeys))
-                        {
-                            float distance = Vector3.Distance(transform.position, key.transform.position);
-                            if (distance < closestKey)
-                            {
-                                closestKey = distance;
-                                goal = key.transform;
-                            }
-                        }
-                        #endregion
+                            Destroy(keys[i].gameObject);
+                            keys.Remove(keys[i]);
 
-                        if (goal) GetToDestination(goal.position);
+                            if (keys.Count == 0) GameObject.Find("Exit").GetComponentInChildren<PathNode>().isDoorClosed = false;
+                        }
                     }
+
+                    #region Find next key
+                    float closestKey = float.PositiveInfinity;
+                    foreach (Collider key in Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyKeys))
+                    {
+                        float distance = Vector3.Distance(transform.position, key.transform.position);
+                        if (distance < closestKey)
+                        {
+                            closestKey = distance;
+                            goal = key.transform;
+                        }
+                    }
+                    #endregion
+
+                    if (goal) GetToDestination(goal.position);
 
                     break;
                 case State.Flee:
-                    //Debug.Log("Flee");
                     Collider[] hunters = Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyHunters);
                     Vector3 safeSpot = transform.position;
                     foreach (Collider hunter in hunters)
                     {
                         if (!Physics.Linecast(transform.position, hunter.transform.position, LayerMasks.onlyWalls))
                         {
-                            Debug.Log("Fleeing from " + hunter.name);
+                            //Debug.Log("Fleeing from " + hunter.transform.parent.name);
                             safeSpot += transform.position - hunter.transform.position;
                         }
                     }
@@ -79,25 +78,18 @@ public class RunnerAI : PathFinder
                     GetToDestination(safeSpot);
                     break;
                 case State.Escape:
+                    if (Vector3.Distance(transform.position, Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyDoors)[0].transform.parent.GetComponentInChildren<PathNode>().transform.position) <= targetVarience)
+                    {
+                        Camera.main.GetComponent<SceneController>().MainMenu();
+                    }
+
+                    goal = Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyDoors)[0].transform;
+                    if (goal) GetToDestination(goal.position);
                     break;
                 default:
                     break;
             }
         }
-
-        //if (Vector3.Distance(transform.position, GetTargetNode.transform.position) < targetVarience)
-        //{ // Reached target
-        //    if (goal)
-        //    {
-        //        // Go to a destination
-        //        GetToDestination(goal.position);
-        //    }
-        //    else
-        //    {
-        //        // Move randomly
-        //        
-        //    }
-        //}
 
         // Do the movement
         if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, Speed * Time.deltaTime);
