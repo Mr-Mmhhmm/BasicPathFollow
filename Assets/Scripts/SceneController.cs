@@ -3,9 +3,14 @@ using UnityEngine.SceneManagement;
 
 public class SceneController : MonoBehaviour
 {
-    public void StartGame()
+    public void PickUpGame()
     {
-        SceneManager.LoadScene("BasicGrid");
+        SceneManager.LoadScene("PickUp_Scene");
+    }
+
+    public void HunterGame()
+    {
+        SceneManager.LoadScene("Hunter_Scene");
     }
 
     public void MainMenu()

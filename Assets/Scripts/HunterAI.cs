@@ -8,7 +8,7 @@ public class HunterAI : PathFinder
     public float Speed = 15f;
     private const float SIGHT_RANGE = 50;
     private const float CAPTURE_RANGE = 10;
-    private Transform goal;
+    public Transform goal;
 
     private enum State { Search, Follow }
     private State myState;
@@ -72,8 +72,13 @@ public class HunterAI : PathFinder
         if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, Speed * Time.deltaTime);
     }
 
-
-
+    /// <summary>
+    /// Looks out from the center of my body to the center of their body
+    /// </summary>
+    /// <param name="Range"></param>
+    /// <param name="OnlyHit"></param>
+    /// <param name="CanBlock"></param>
+    /// <returns></returns>
     private bool CanSee(float Range, LayerMask OnlyHit, LayerMask CanBlock)
     {
         bool canSee = false;
@@ -81,7 +86,7 @@ public class HunterAI : PathFinder
         {
             foreach (Collider obj in Physics.OverlapSphere(transform.position, Range, OnlyHit))
             {
-                if (!Physics.Linecast(transform.position, obj.transform.position, CanBlock))
+                if (!Physics.Linecast(transform.Find("Body").position, obj.transform.position, CanBlock))
                 {
                     canSee = true;
                     break;

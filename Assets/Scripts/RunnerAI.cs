@@ -44,7 +44,13 @@ public class RunnerAI : PathFinder
                             Destroy(keys[i].gameObject);
                             keys.Remove(keys[i]);
 
-                            if (keys.Count == 0) GameObject.Find("Exit").GetComponentInChildren<PathNode>().isDoorClosed = false;
+                            if (keys.Count == 0)
+                            {
+                                foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Exit"))
+                                {
+                                    obj.GetComponentInChildren<PathNode>().isDoorClosed = false;
+                                }
+                            }
                         }
                     }
 
@@ -96,8 +102,13 @@ public class RunnerAI : PathFinder
         if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, Speed * Time.deltaTime);
     }
 
-
-
+    /// <summary>
+    /// Looks out from the center of my body to the center of their body
+    /// </summary>
+    /// <param name="Range"></param>
+    /// <param name="OnlyHit"></param>
+    /// <param name="CanBlock"></param>
+    /// <returns></returns>
     private bool CanSee(float Range, LayerMask OnlyHit, LayerMask CanBlock)
     {
         bool canSee = false;
