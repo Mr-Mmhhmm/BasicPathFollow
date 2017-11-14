@@ -13,6 +13,11 @@ public class SceneController : MonoBehaviour
         SceneManager.LoadScene("Hunter_Scene");
     }
 
+    public void RespondGame()
+    {
+        SceneManager.LoadScene("HunterRespond_Scene");
+    }
+
     public void MainMenu()
     {
         SceneManager.LoadScene("Menu");

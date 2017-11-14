@@ -9,5 +9,11 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: c20132859fe0f414fb772177791feb27
   - enabled: 1
-    path: Assets/Scenes/BasicGrid.unity
+    path: Assets/Scenes/PickUp_Scene.unity
     guid: e7d99018083562a4c853d68a0700262a
+  - enabled: 1
+    path: Assets/Scenes/HunterRespond_Scene.unity
+    guid: 265c62027fe09d04b8efb43c33ef8844
+  - enabled: 1
+    path: Assets/Scenes/Hunter_Scene.unity
+    guid: 83183796e268ff54496390ef68b080b0

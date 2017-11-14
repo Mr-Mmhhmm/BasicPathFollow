@@ -6,12 +6,13 @@ using Pathing;
 public class HunterAI : PathFinder
 {
     public float Speed = 15f;
-    private const float SIGHT_RANGE = 50;
+    private const float SIGHT_RANGE = 30;
     private const float CAPTURE_RANGE = 10;
-    public Transform goal;
+    public Vector3 goal;
+    public bool canSeeGoal;
 
-    private enum State { Search, Follow }
-    private State myState;
+    public enum State { Search, Follow }
+    public State myState;
 
     // Use this for initialization
     void Start()
@@ -22,7 +23,7 @@ public class HunterAI : PathFinder
     // Update is called once per frame
     void Update()
     {
-        if (CanSee(SIGHT_RANGE, LayerMasks.onlyRunners, LayerMasks.onlyWalls)) myState = State.Follow;
+        if (CanSee(SIGHT_RANGE, LayerMasks.onlyRunners, LayerMasks.onlyWalls) || canSeeGoal) myState = State.Follow;
         else myState = State.Search;
 
 
@@ -37,36 +38,34 @@ public class HunterAI : PathFinder
                     }
                     break;
                 case State.Follow:
-                    Collider[] runners = Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyRunners);
-
-                    #region Find our goal
-                    float closestRunner = float.PositiveInfinity;
-                    foreach (Collider runner in runners)
-                    {
-                        float distance = Vector3.Distance(transform.position, runner.transform.position);
-                        if (distance < closestRunner)
-                        {
-                            closestRunner = distance;
-                            goal = runner.transform;
-                        }
-                    }
-                    #endregion
-
-                    if (goal)
-                    {
-                        if (Vector3.Distance(transform.position, goal.position) < CAPTURE_RANGE)
-                        {
-                            Camera.main.GetComponent<SceneController>().MainMenu();
-                        }
-                        else
-                        {
-                            GetToDestination(goal.position);
-                        }
-                    }
-
+                    if (Vector3.Distance(transform.position, goal) < CAPTURE_RANGE) canSeeGoal = false;
+                    if (canSeeGoal) GetToDestination(goal);
                     break;
                 default:
                     break;
+            }
+        }
+
+        #region Find our goal
+        Collider[] runners = Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyRunners);
+        float closestRunner = float.PositiveInfinity;
+        foreach (Collider runner in runners)
+        {
+            float distance = Vector3.Distance(transform.position, runner.transform.position);
+            if (CanSee(SIGHT_RANGE, runner.transform, LayerMasks.onlyWalls) && distance < closestRunner)
+            {
+                closestRunner = distance;
+                goal = runner.transform.position;
+                canSeeGoal = true;
+            }
+        }
+        #endregion
+
+        if (canSeeGoal)
+        {
+            if (CanSee(CAPTURE_RANGE, LayerMasks.onlyRunners, LayerMasks.onlyWalls))
+            {
+                Camera.main.GetComponent<SceneController>().MainMenu();
             }
         }
         if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, Speed * Time.deltaTime);
@@ -95,5 +94,28 @@ public class HunterAI : PathFinder
         }
 
         return canSee;
+    }
+
+    private bool CanSee(float Range, Transform Target, LayerMask CanBlock)
+    {
+        return !Physics.Linecast(transform.Find("Body").position, Target.position, CanBlock);
+    }
+
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.black;
+        Gizmos.DrawWireSphere(transform.position, SIGHT_RANGE);
+
+        if (Physics.CheckSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyRunners))
+        {
+            foreach (Collider obj in Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyRunners))
+            {
+                if (!Physics.Linecast(transform.Find("Body").position, obj.transform.position, LayerMasks.onlyWalls))
+                {
+                    Gizmos.DrawLine(transform.Find("Body").position, obj.transform.position);
+                }
+            }
+        }
     }
 }

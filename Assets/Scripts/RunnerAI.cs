@@ -7,7 +7,11 @@ public class RunnerAI : PathFinder
     private const float PICKUP_RADIUS = 5;
     private const float SIGHT_RANGE = 40;
 
-    public float Speed = 15f;
+    public float NormalSpeed = 15f;
+    public float SprintSpeed = 30f;
+    private float endSprintTime;
+    private const float DELTA_SPRINT_TIME = 2;
+
     private List<GameObject> keys;
     private Transform goal;
 
@@ -71,6 +75,7 @@ public class RunnerAI : PathFinder
 
                     break;
                 case State.Flee:
+                    endSprintTime = Time.time + DELTA_SPRINT_TIME;
                     Collider[] hunters = Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyHunters);
                     Vector3 safeSpot = transform.position;
                     foreach (Collider hunter in hunters)
@@ -99,7 +104,7 @@ public class RunnerAI : PathFinder
         }
 
         // Do the movement
-        if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, Speed * Time.deltaTime);
+        if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, (Time.time < endSprintTime ? SprintSpeed : NormalSpeed) * Time.deltaTime);
     }
 
     /// <summary>
