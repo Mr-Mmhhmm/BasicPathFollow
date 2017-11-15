@@ -5,18 +5,20 @@ using Pathing;
 public class RunnerAI : PathFinder
 {
     private const float PICKUP_RADIUS = 5;
-    private const float SIGHT_RANGE = 40;
+    public float SIGHT_RANGE = 40;
 
     public float NormalSpeed = 15f;
     public float SprintSpeed = 30f;
     private float endSprintTime;
-    private const float DELTA_SPRINT_TIME = 2;
+    private const float DELTA_SPRINT_TIME = 0.5f;
+    private float cantSprintTime;
+    private const float DELTA_CANT_SPRINT_TIME = 0.5f;
 
     private List<GameObject> keys;
-    private Transform goal;
+    public Transform goal;
 
-    private enum State { Wander, PickupKey, Flee, Escape }
-    private State myState;
+    public enum State { Wander, PickupKey, Flee, Escape }
+    public State myState;
 
     private void Start()
     {
@@ -75,7 +77,11 @@ public class RunnerAI : PathFinder
 
                     break;
                 case State.Flee:
-                    endSprintTime = Time.time + DELTA_SPRINT_TIME;
+                    if (Time.time > cantSprintTime)
+                    {
+                        endSprintTime = Time.time + DELTA_SPRINT_TIME;
+                        cantSprintTime = endSprintTime + DELTA_CANT_SPRINT_TIME;
+                    }
                     Collider[] hunters = Physics.OverlapSphere(transform.position, SIGHT_RANGE, LayerMasks.onlyHunters);
                     Vector3 safeSpot = transform.position;
                     foreach (Collider hunter in hunters)

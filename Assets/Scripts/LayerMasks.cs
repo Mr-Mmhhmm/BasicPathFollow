@@ -9,4 +9,5 @@ public class LayerMasks : ScriptableObject
     public static LayerMask onlyKeys = 1 << 11;
     public static LayerMask onlyHunters = 1 << 12;
     public static LayerMask onlyRunners = 1 << 13;
+    public static LayerMask onlyCharacters =  onlyHunters.value | onlyRunners.value;
 }

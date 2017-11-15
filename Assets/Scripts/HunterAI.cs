@@ -57,17 +57,16 @@ public class HunterAI : PathFinder
                 closestRunner = distance;
                 goal = runner.transform.position;
                 canSeeGoal = true;
+                CallOut(goal);
             }
         }
         #endregion
 
-        if (canSeeGoal)
+        if (canSeeGoal && CanSee(CAPTURE_RANGE, LayerMasks.onlyRunners, LayerMasks.onlyWalls))
         {
-            if (CanSee(CAPTURE_RANGE, LayerMasks.onlyRunners, LayerMasks.onlyWalls))
-            {
-                Camera.main.GetComponent<SceneController>().MainMenu();
-            }
+            Camera.main.GetComponent<SceneController>().MainMenu();
         }
+
         if (GetTargetNode) transform.position = Vector3.MoveTowards(transform.position, GetTargetNode.transform.position, Speed * Time.deltaTime);
     }
 
@@ -115,6 +114,26 @@ public class HunterAI : PathFinder
                 {
                     Gizmos.DrawLine(transform.Find("Body").position, obj.transform.position);
                 }
+            }
+        }
+    }
+
+    public void Respond(Vector3 LastSeen)
+    {
+        //if (!canSeeGoal)
+        //{
+            goal = LastSeen;
+            canSeeGoal = true;
+        //}
+    }
+
+    private void CallOut(Vector3 LastSeen)
+    {
+        foreach (GameObject hunter in GameObject.FindGameObjectsWithTag("Hunter"))
+        {
+            if (hunter.GetComponent<HunterAI>())
+            {
+                hunter.GetComponent<HunterAI>().Respond(LastSeen);
             }
         }
     }

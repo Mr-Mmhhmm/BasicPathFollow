@@ -9,6 +9,7 @@ TagManager:
   - Floor
   - Key
   - Exit
+  - Hunter
   layers:
   - Default
   - TransparentFX
